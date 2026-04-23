@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Summary</title>
+    <style>
+        body {
+            font-family: Arial;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            width: 500px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 50px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Order Summary</h2>
+        <p>Customer Name: <span id="name"></span></p>
+        <p>Product: <span id="product"></span></p>
+        <p>Quantity: <span id="quantity"></span></p>
+        <p>Total Amount: PHP <span id="total"></span></p>
+        <p>Pickup Method: <span id="pickup"></span></p>
+        <div id="addressDiv">
+        <p>Address: <span id="address"></span></p>
+        </div>
+        <p>Thank you for your order!</p>
+    </div>
+
+    <script>
+    function getCookie(name) {
+      let cookies = document.cookie.split(';');
+      for (let cookie of cookies) {
+        let parts = cookie.trim().split('=');
+        if (parts[0] === name) {
+          return decodeURIComponent(parts[1].split(';')[0]);
+        }
+      }
+      return null;
+    }
+
+    function getOrderDetails() {
+      let customerName = localStorage.getItem('customerName');
+      let product = localStorage.getItem('product');
+      let quantity = localStorage.getItem('quantity');
+      let pickup = localStorage.getItem('pickup');
+      let address = localStorage.getItem('address');
+      let price = localStorage.getItem('price');
+
+      return {
+        customerName: customerName,
+        product: product,
+        quantity: quantity,
+        pickup: pickup,
+        address: address,
+        price: price
+      };
+    }
+
+    function displayOrderSummary() {
+      let details = getOrderDetails();
+      console.log('Order details:', details);
+
+      document.getElementById('name').innerHTML = details.customerName || 'N/A';
+      document.getElementById('product').innerHTML = details.product || 'N/A';
+      document.getElementById('quantity').innerHTML = details.quantity || 'N/A';
+      let total = details.price && details.quantity ? parseInt(details.price) * parseInt(details.quantity) : 0;
+      document.getElementById('total').innerHTML = total;
+      document.getElementById('pickup').innerHTML = details.pickup || 'N/A';
+      if (details.pickup === 'Delivery') {
+        document.getElementById('address').innerHTML = details.address || 'N/A';
+      } else {
+        document.getElementById('addressDiv').style.display = 'none';
+      }
+    }
+
+    // Call the function when the page loads
+    displayOrderSummary();
+    </script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pre-Order Form</title>
+  <style>
+    body {
+      font-family: Arial;
+      background-color: #f4f4f4;
+    }
+
+    .container {
+      width: 500px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 50px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    input, select {
+      width: 95%;
+      padding: 8px;
+      margin: 8px 0;
+    }
+
+    #terms {
+      width: 10%;
+    }
+
+    button {
+      padding: 10px;
+      width: 100%;
+      margin-top: 5px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .error {
+      color: red;
+      margin-bottom: 10px;
+      min-height: 18px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>Science Project Pre-Order</h2>
+  <p>Project HEAR is a system designed to help hard-of-hearing students without hurting their wallets! It's not necessarily a standard hearing aid, but the system can be integrated into devices for such purpose. It comes in basic and premium versions to suit different needs. Pre-order your Project HEAR today!</p>
+
+  <!-- Error Message Area -->
+  <div id="errorMsg" class="error"></div>
+
+  <form onsubmit="return handleOrder()">
+    
+    <label>Name:</label>
+    <input type="text" id="name">
+
+    <label>Product:</label>
+    <select id="variant">
+      <option value="">Select</option>
+      <option value="value1">Project HEAR (PHP 1150)</option>
+      <option value="value2">Superior Project HEAR (PHP 1250)</option>
+      <option value="value3">Project HEAR with Additional Features (PHP 1350)</option>
+      <option value="value4">Superior Project HEAR with Additional Features (PHP 1450)</option>
+      <option value="value5">Project HEAR + Superior Project HEAR (PHP 2300)</option>
+      <option value="value6">Project HEAR + Project HEAR with Additional Features (PHP 2400)</option>
+      <option value="value7">Project HEAR + Superior Project HEAR with Additional Features (PHP 2500)</option>
+      <option value="value8">Superior Project HEAR + Project HEAR with Additional Features (PHP 2600)</option>
+      <option value="value9">Superior Project HEAR + Project HEAR with Additional Features (PHP 2700)</option>
+      <option value="value10">Project HEAR + Superior Project HEAR + Project HEAR with Additional Features (PHP 3500)</option>
+      <option value="value11">Project HEAR + Superior Project HEAR + Superior Project HEAR with Additional Features (PHP 3600)</option>
+      <option value="value12">Project HEAR + Project HEAR with Additional Features + Superior Project HEAR with Additional Features (PHP 3700)</option>
+      <option value="value13">Superior Project HEAR + Project HEAR with Additional Features + Superior Project HEAR with Additional Features (PHP 3800)</option>
+      <option value="value14">Project HEAR + Superior Project HEAR + Project HEAR with Additional Features + Superior Project HEAR with Additional Features (PHP 4500)</option>
+      <option value="value15">Superior Project HEAR + Project HEAR with Additional Features + Superior Project HEAR with Additional Features + Project HEAR + Superior Project HEAR (PHP 4600)</option>
+    </select>
+
+    <label>Quantity:</label>
+    <input type="number" id="quantity" min="1">
+
+    <label>Pickup Method:</label>
+    <select id="pickup">
+      <option value="">Select</option>
+      <option value="Delivery">Delivery</option>
+      <option value="Meetup">Meetup</option>
+    </select>
+
+    <label>Address (for delivery only):</label>
+    <input type="text" id="address">
+
+    <label>
+      <input type="checkbox" id="terms"> I accept terms
+    </label>
+    <br><br>
+
+    <button type="button" onclick="loadPreviousOrder()">Load Previous Order</button>
+    <button type="submit">Submit</button>
+
+  </form>
+</div>
+
+<script>
+
+  // COOKIE FUNCTIONS
+  function setCookie(name, value, maxAge) {
+    document.cookie = name + "=" + encodeURIComponent(value) + "; max-age=" + maxAge + "; path=/";
+  }
+
+  function getCookie(name) {
+    let cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      let parts = cookie.trim().split('=');
+      if (parts[0] === name) {
+        return decodeURIComponent(parts[1].split(';')[0]);
+      }
+    }
+    return null;
+  }
+
+  function deleteCookie(name) {
+    document.cookie = name + "=; max-age=0; path=/";
+  }
+
+  // MAIN SUBMIT HANDLER
+  function handleOrder() {
+    document.getElementById("errorMsg").innerHTML = "";
+
+    let name = document.getElementById('name').value.trim();
+    let variantEl = document.getElementById('variant');
+    let product = variantEl.options[variantEl.selectedIndex].text;
+    let priceMatch = product.match(/PHP (\d+)/);
+    let price = priceMatch ? priceMatch[1] : '0';
+    let quantity = document.getElementById('quantity').value;
+    let pickup = document.getElementById('pickup').value;
+    let address = document.getElementById('address').value.trim();
+    let terms = document.getElementById('terms').checked;
+
+    let errors = validateForm(name, product, quantity, pickup, address, terms);
+    if (errors.length > 0) {
+      document.getElementById("errorMsg").innerHTML = "The following fields are invalid: " + errors.join(', ');
+      return false;
+    }
+
+    setCookie('customerName', name, 86400 * 30); // 30 days
+    localStorage.setItem('customerName', name);
+    localStorage.setItem('product', product);
+    localStorage.setItem('quantity', quantity);
+    localStorage.setItem('pickup', pickup);
+    localStorage.setItem('address', address);
+    localStorage.setItem('price', price);
+
+    window.location.href = "summary.html";
+    return false;
+  }
+
+  function validateForm(name, product, quantity, pickup, address, terms) {
+    let errors = [];
+    if (!name) errors.push('Customer Name');
+    if (!product || product === 'Select') errors.push('Product');
+    if (!quantity || isNaN(quantity) || quantity <= 0) errors.push('Quantity');
+    if (!pickup) errors.push('Pickup Method');
+    if (pickup === 'Delivery' && !address) errors.push('Address');
+    if (!terms) errors.push('Terms');
+    return errors;
+  }
+
+  // LOAD PREVIOUS ORDER
+  function loadPreviousOrder() {
+    let name = localStorage.getItem('customerName');
+    let product = localStorage.getItem('product');
+    let quantity = localStorage.getItem('quantity');
+    let pickup = localStorage.getItem('pickup');
+    let address = localStorage.getItem('address');
+
+    if (!name && !product) {
+      document.getElementById('errorMsg').innerHTML = "No previous order data";
+      return;
+    }
+
+    if (name) document.getElementById('name').value = name;
+    if (product) {
+      let select = document.getElementById('variant');
+      for (let option of select.options) {
+        if (option.text === product) {
+          select.value = option.value;
+          break;
+        }
+      }
+    }
+    if (quantity) document.getElementById('quantity').value = quantity;
+    if (pickup) document.getElementById('pickup').value = pickup;
+    if (address) document.getElementById('address').value = address;
+  }
+
+</script>
+
+</body>
+</html>
